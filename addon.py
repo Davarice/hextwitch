@@ -18,5 +18,12 @@ import hexchat_twitch as plugin
 __module_name__ = "HexTwitch"
 __module_version__ = plugin.VERSION
 __module_description__ = (
-    '(irc.twitch.tv) Subscription notifications, name shortening, user "badges", and more'
+    "(irc.twitch.tv) "
+    'Subscription notifications, name shortening, user "badges", and more.'
 )
+
+
+Twitch = plugin.HexTwitch(hexchat)
+
+
+Twitch.echo("{} v{} loaded.".format(__module_name__, __module_version__))
