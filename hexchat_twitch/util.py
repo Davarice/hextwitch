@@ -44,7 +44,7 @@ def highest_below(seq: List[int], limit: int):
 
 def plural(num: int, root="", end_plural="s", end_single=""):
     """Given grammar and a number, return the appropriate singular or plural form."""
-    return root + {True: end_plural, False: end_single}[num != 1]
+    return root + (end_single if num == 1 else end_plural)
 
 
 def split_tags(ircv3: bytes) -> Tuple[str, defaultdict]:
