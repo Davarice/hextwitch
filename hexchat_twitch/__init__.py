@@ -46,7 +46,7 @@ class HexTwitch:
         util.color_tab(ctx, 0, True)
         return self.hexchat.EAT_NONE
 
-    def cb_message_send(self, words: List[str], words_eol: List[str], _, attrs):
+    def cb_message_send(self, words: List[str], words_eol: List[str]):
         """The HexChat command `/say` has just been invoked. This means that the
             user has typed and sent a message. Intercept it, and check whether
             it has been typed into a Twitch Whisper channel. If it has, do not
@@ -69,6 +69,7 @@ class HexTwitch:
         ctx = self.hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
             return self.hexchat.EAT_NONE
+        message = ServerMessage(words, attrs.ircv3, ctx)
 
     def cb_message_hex(self, args: List[str], args_eol: List[str], mtype: str):
         """A message is being posted in HexChat. All we know initially is that

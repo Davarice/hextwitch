@@ -1,6 +1,7 @@
 """Util module"""
 
-from typing import List
+from collections import defaultdict
+from typing import List, Tuple
 
 import hexchat
 
@@ -46,24 +47,20 @@ def plural(num: int, root="", end_plural="s", end_single=""):
     return root + {True: end_plural, False: end_single}[num != 1]
 
 
-def split_tags(tagline: bytes) -> dict:
-    """Split a raw IRCv3 bytestring into a dict and return it."""
-    # TODO: REWRITE
-    tagline = tagline.decode("utf-8").lstrip("@")
-    tags = {}
-    m = ""
+def split_tags(ircv3: bytes) -> Tuple[str, defaultdict]:
+    """Split a raw IRCv3 bytestring into a default dict and return it."""
+    string_full = ircv3.decode("utf-8")
+    tags_dict = defaultdict(str)
+    if string_full[0] == "@":
+        # Starting with @ indicates that the first half is Tags. The two
+        #   segments are separated by a space.
+        tags, text = string_full.split(" ", 1)
 
-    tagtable = tagline.split(";")
-
-    for pair in tagtable:
-        try:
-            [k, v] = pair.split("=", 1)
-            if " :" in v:
-                vm = v.split(" :", 1)
-                v = vm[0]
-                m = vm[1]
-            tags.update({k: v})
-        except:
-            pass
-    tags.update({"_msg": m})
-    return tags
+        for pair in tags[1:].split(";"):
+            if "=" in pair:
+                k, v = pair.split("=", 1)
+                tags_dict[k] = v
+    else:
+        # Otherwise, the whole thing is pure message.
+        text = string_full
+    return text, tags_dict
