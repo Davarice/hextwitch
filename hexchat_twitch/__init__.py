@@ -5,6 +5,7 @@ Copyright @Davarice 2019, GPLv3
 
 VERSION = "0.0.2"
 
+from collections import deque
 from typing import List
 
 from .config import cfg
@@ -23,7 +24,7 @@ events_send = {"Your Message": 2, "Your Action": 2}
 
 
 userstates = {}
-inbox = []
+inbox = deque([], 5)
 
 
 class HexTwitch:
@@ -70,6 +71,42 @@ class HexTwitch:
         if ctx.get_info("network").lower() != "twitch":
             return self.hexchat.EAT_NONE
         message = ServerMessage(words, attrs.ircv3, ctx)
+        if message.mtype == "ROOMSTATE":
+            # Nothing notable.
+            return self.hexchat.EAT_HEXCHAT
+        elif message.mtype == "USERSTATE":
+            # Receiving data about user.
+            userstates[
+                f'{ctx.get_info("network")}/{ctx.get_info("channel")}'
+            ] = util.split_badges(message.tags["badges"])
+            return self.hexchat.EAT_HEXCHAT
+        elif message.mtype == "PRIVMSG":
+            # Receiving a message. Save it for now and wait for it to come up.
+            inbox.append(message)
+            return hexchat.EAT_NONE
+        elif message.mtype == "USERNOTICE":
+            # Notable event; Subscription or Raid.
+            return  # TODO
+        elif message.mtype == "WHISPER":
+            # Receiving a Twitch Whisper (DM). Put it in its own tab.
+            return  # TODO
+        elif message.mtype == "HOSTTARGET":
+            # This channel has started hosting. Print a direct link.
+            return  # TODO
+        elif message.mtype == "CLEARCHAT":
+            # A user has been purged. Either a timeout or a ban.
+            return  # TODO
+        elif message.mtype == "CLEARMSG":
+            # A message has been selectively deleted. Repost it.
+            return  # TODO
+        else:
+            # Unknown event type. Make a note of it.
+            self.echo(
+                "Unknown event of type '{}' in {}: {}".format(
+                    message.mtype, ctx.get_info("channel"), message.msg
+                )
+            )
+            return hexchat.EAT_NONE
 
     def cb_message_hex(self, args: List[str], args_eol: List[str], mtype: str):
         """A message is being posted in HexChat. All we know initially is that
