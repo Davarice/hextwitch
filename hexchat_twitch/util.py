@@ -6,6 +6,12 @@ from typing import List, Tuple
 import hexchat
 
 
+# TODO: Put this in Config
+badge_chars = {}
+prefix_maxlen = 3
+badge_separate = " "
+
+
 tab_colors = {}
 
 
@@ -45,6 +51,24 @@ def highest_below(seq: List[int], limit: int):
 def plural(num: int, root="", end_plural="s", end_single=""):
     """Given grammar and a number, return the appropriate singular or plural form."""
     return root + (end_single if num == 1 else end_plural)
+
+
+def split_badges(bstring: str):
+    if not bstring:
+        return ""
+    prefix = ""
+    for badge in bstring.split(","):
+        btype, rank = badge.split("/")
+        # "Rank" here is the "level" of the badge, for example "12" for the
+        #   1-year subscription badge. The entry in badge_chars can be a dict,
+        #   and if it is, the keys should be integers. The highest key which is
+        #   <= the rank is the key whose value is displayed.
+        icon = badge_chars.get(btype)
+        if icon:
+            if type(icon) == dict:
+                icon = str(icon.get(highest_below(icon, int(rank)), ""))
+            prefix += icon
+    return prefix[:prefix_maxlen] + badge_separate if prefix else ""
 
 
 def split_tags(ircv3: bytes) -> Tuple[str, defaultdict]:
