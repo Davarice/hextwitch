@@ -15,7 +15,7 @@ this.
 # https://hexchat.readthedocs.io/en/latest/script_python.html
 import hexchat
 
-import hexchat_twitch as plugin
+import hexchat_twitch.__init__ as plugin
 
 
 # Set information that will be displayed in the HexChat Addons list.

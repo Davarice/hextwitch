@@ -10,10 +10,12 @@ Uses YAML by default, but can be easily modified to accept any file format which
 """
 
 from pathlib import Path
-from sys import argv
 from typing import Union
 
 import oyaml
+
+
+cfg_dirs = ["~/.config/hexchat", "~/"]
 
 
 def read_file(path: Path):
@@ -156,8 +158,18 @@ class ConfigReader:
             overwrite it. This is useful for "transparent" configurations, as it
             allows them to chain.
         """
-        dat = read_file(self.root / filepath)
-        self.cfg_dict.update(dat)
+        fp = Path(filepath)
+        if fp.is_absolute():
+            dat = read_file(fp)
+        else:
+            dat = {}
+            for directory in cfg_dirs:
+                dat = read_file(Path(directory) / fp)
+                if dat:
+                    break
+
+        if dat:
+            self.cfg_dict.update(dat)
 
         if "shadow" in self.cfg_dict:
             nextload = self.cfg_dict.pop("shadow")
@@ -171,4 +183,4 @@ class ConfigReader:
             return self.get(attr)
 
 
-cfg = ConfigReader(Path(argv[0]).parent)
+cfg = ConfigReader()
