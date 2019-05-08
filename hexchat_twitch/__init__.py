@@ -1,16 +1,17 @@
 """Plugin Root Package
 
-Copyright @Davarice 2019, GPLv3
+Copyright (C) 2019 @Davarice
+Free Software under GPLv3
 """
 
-VERSION = "0.0.2"
+VERSION = "0.0.4-dev0"
 
 from collections import deque
 from typing import List
 
-from .config import cfg
-from .messaging import ServerMessage, HexMessage
-from . import util
+from hexchat_twitch.config import cfg
+from hexchat_twitch.messaging import ServerMessage, HexMessage
+from hexchat_twitch import api, util
 
 
 commands = {}
@@ -25,6 +26,9 @@ events_send = {"Your Message": 2, "Your Action": 2}
 
 userstates = {}
 inbox = deque([], 5)
+
+
+cfg.load("config.yml", False)
 
 
 class HexTwitch:
