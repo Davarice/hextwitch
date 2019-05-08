@@ -9,6 +9,8 @@ VERSION = "0.0.4-dev0"
 from collections import deque
 from typing import List
 
+import hexchat
+
 from hexchat_twitch.config import cfg
 from hexchat_twitch.messaging import ServerMessage, HexMessage
 from hexchat_twitch import api, util
@@ -32,11 +34,8 @@ cfg.load("config.yml", False)
 
 
 class HexTwitch:
-    def __init__(self, hexchat):
-        self.hexchat = hexchat
-
     def echo(self, text: str, type_: str = "Server Error", ctx=None):
-        (ctx or self.hexchat).emit_print(type_, text)
+        (ctx or hexchat).emit_print(type_, text)
 
     # ===--
     # CALLBACKS: Called by HexChat when Something™ happens.
@@ -45,11 +44,11 @@ class HexTwitch:
     def cb_focus(self, *_):
         """Reset the color of a newly focused tab."""
         try:
-            ctx = self.hexchat.get_context()
+            ctx = hexchat.get_context()
         except:
-            return self.hexchat.EAT_NONE
+            return hexchat.EAT_NONE
         util.color_tab(ctx, 0, True)
-        return self.hexchat.EAT_NONE
+        return hexchat.EAT_NONE
 
     def cb_message_send(self, words: List[str], words_eol: List[str]):
         """The HexChat command `/say` has just been invoked. This means that the
@@ -57,9 +56,9 @@ class HexTwitch:
             it has been typed into a Twitch Whisper channel. If it has, do not
             send it as a `/say text`; Instead, send it as a `/w username text`.
         """
-        ctx = self.hexchat.get_context()
+        ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
-            return self.hexchat.EAT_NONE
+            return hexchat.EAT_NONE
 
     def cb_message_server(self, words: List[str], words_eol: List[str], _, attrs):
         """A message is being received from Twitch. All we know initially is that
@@ -71,19 +70,19 @@ class HexTwitch:
         If HexChat changes what attributes are given, THIS IS THE `attrs` WHERE
             THAT MATTERS.
         """
-        ctx = self.hexchat.get_context()
+        ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
-            return self.hexchat.EAT_NONE
+            return hexchat.EAT_NONE
         message = ServerMessage(words, attrs.ircv3, ctx)
         if message.mtype == "ROOMSTATE":
             # Nothing notable.
-            return self.hexchat.EAT_HEXCHAT
+            return hexchat.EAT_HEXCHAT
         elif message.mtype == "USERSTATE":
             # Receiving data about user.
             userstates[
                 f'{ctx.get_info("network")}/{ctx.get_info("channel")}'
             ] = util.split_badges(message.tags["badges"])
-            return self.hexchat.EAT_HEXCHAT
+            return hexchat.EAT_HEXCHAT
         elif message.mtype == "PRIVMSG":
             # Receiving a message. Save it for now and wait for it to come up.
             inbox.append(message)
@@ -116,14 +115,14 @@ class HexTwitch:
         """A message is being posted in HexChat. All we know initially is that
             `mtype` is a `str` also found in `events_recv`. Deal with it.
         """
-        ctx = self.hexchat.get_context()
+        ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
-            return self.hexchat.EAT_NONE
+            return hexchat.EAT_NONE
 
     def cb_message_user(self, args: List[str], args_eol: List[str], mtype: str):
         """A message is being posted in HexChat. All we know initially is that
             `mtype` is a `str` also found in `events_send`. Deal with it.
         """
-        ctx = self.hexchat.get_context()
+        ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
-            return self.hexchat.EAT_NONE
+            return hexchat.EAT_NONE

@@ -27,7 +27,7 @@ __module_description__ = (
 )
 
 # Initialize the plugin.
-Twitch = plugin.HexTwitch(hexchat)
+Twitch = plugin.HexTwitch()
 
 # Set up all necessary Callbacks.
 hexchat.hook_server_attrs("RAW LINE", Twitch.cb_message_server)
