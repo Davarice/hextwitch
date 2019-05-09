@@ -137,8 +137,11 @@ class HexTwitch:
                 source_message = m
                 inbox.remove(m)
                 break
+
         if source_message:
+            # This message has a ServerMessage twin. Apply tags.
             message = HexMessage(mtype, name, text, pre, source_message)
+            message.emit()
             return hexchat.EAT_ALL
 
     def cb_message_user(self, args: List[str], _: List[str], mtype: str):
@@ -151,3 +154,9 @@ class HexTwitch:
         ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
             return hexchat.EAT_NONE
+
+        channel = ctx.get_info("channel")
+        if not channel.startswith("#") or args[1].lower().startswith(".w "):
+            # Channel does NOT start with #, OR the message DOES start with .w
+            # This message is intended to be a Whisper/DM
+            return hexchat.EAT_ALL

@@ -14,6 +14,7 @@ class HexMessage:
 
     Takes a number of strings and allows modifying the message before sending.
     """
+
     def __init__(self, mtype: str, name: str, msg: str, badge: str = "", servmsg=None):
         self.mtype = mtype
         self.author = name
@@ -22,7 +23,7 @@ class HexMessage:
         self.servmsg = servmsg
 
     def emit(self):
-        pass
+        self.servmsg.context.emit_print(self.mtype, self.author, self.msg, self.badge)
 
 
 class ServerMessage:
@@ -31,6 +32,7 @@ class ServerMessage:
     Takes a Bytes object containing the pure IRCv3 string received. Breaks the
         string apart into a Dict of tags that can be accessed easily.
     """
+
     def __init__(self, words: List[str], raw: bytes, ts: int, ctx=None):
         self.words = words
         self.raw = raw

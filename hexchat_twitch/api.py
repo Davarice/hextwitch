@@ -47,7 +47,7 @@ def id_from_name(name):
         return 0
 
 
-def rooms(channel):
+def get_rooms(channel):
     uid = id_from_name(channel)
     if uid:
         ret = request(
