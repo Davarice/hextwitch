@@ -2,6 +2,7 @@
 
 import hexchat
 
+from hexchat_twitch.api import get_rooms
 from hexchat_twitch.util import color_tab
 
 
@@ -35,7 +36,25 @@ def channel_get(name):
 
 
 def channel_join(name):
-    pass
+    ctx = hexchat.get_context()
+    if ctx.get_info("network").lower() != "twitch" or ":" in name:
+        return hexchat.EAT_NONE
+    rooms = get_rooms(name[1:])
+    if rooms:
+        for room in rooms.get("rooms", []):
+            # Assemble the true channel name of each Room.
+            room_true = ":".join(
+                ["#chatrooms", str(room.get("owner_id", 0)), str(room.get("_id", 0))]
+            )
+            # Execute the JOIN command to connect to the Room.
+            ctx.command("join " + room_true)
+            # Find the newly opened tab.
+            room_ = channel_get(room_true)
+            if room_:
+                # Then, give it an alias of the form `#channel.room`.
+                room_.command(
+                    "settab #{}.{}".format(room.get("parent", ""), room.get("name", ""))
+                )
 
 
 def dm_post(author, channel, text, mtype):
