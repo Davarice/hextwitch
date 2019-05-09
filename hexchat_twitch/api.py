@@ -53,6 +53,12 @@ def rooms(channel):
         ret = request(
             "https://api.twitch.tv/kraken/chat/{}/rooms".format(uid), True, True
         )
-        return ret.json() if ret.status_code == requests.codes.ok else {}
+        if ret.status_code == requests.codes.ok:
+            out = ret.json()
+            for room in out["rooms"]:
+                room["parent"] = channel
+        else:
+            out = {}
     else:
-        return {}
+        out = {}
+    return out

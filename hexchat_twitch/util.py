@@ -80,10 +80,17 @@ def split_tags(ircv3: bytes) -> Tuple[str, defaultdict]:
         #   segments are separated by a space.
         tags, text = string_full.split(" ", 1)
 
-        for pair in tags[1:].split(";"):
-            if "=" in pair:
-                k, v = pair.split("=", 1)
-                tags_dict[k] = v
+        # for pair in tags[1:].split(";"):
+        #     if "=" in pair:
+        #         k, v = pair.split("=", 1)
+        #         tags_dict[k] = v
+
+        tags_dict = {
+            k: v
+            for k, v in [
+                pair.split("=", 1) for pair in tags[1:].split(";") if "=" in pair
+            ]
+        }
     else:
         # Otherwise, the whole thing is pure message.
         text = string_full
