@@ -6,7 +6,13 @@ Provides methods for sending IRC messages to Twitch through HexChat, and
 
 from typing import List
 
-from hexchat_twitch.util import split_tags
+import hexchat
+
+from hexchat_twitch.config import cfg
+from hexchat_twitch.util import ctxid, render_badges, split_tags
+
+
+userstates = {}
 
 
 class HexMessage:
@@ -49,3 +55,22 @@ class ServerMessage:
 
         self.author = self.hostname.split("!", 1)[0][1:]
         self.ident = "/".join([str(ts), self.author, self.message])
+
+
+def message_emit(
+    ctx: hexchat.Context, mtype: str, author: str, content: str, badges: str
+):
+    ctx.emit_print(mtype, author, content, badges)
+
+
+def message_from_other(
+    ctx: hexchat.Context, mtype: str, author: str, content: str, source: ServerMessage
+):
+    badges = render_badges(source.tags.get("badges", {}))
+    message_emit(ctx, mtype, author, content, badges)
+
+
+def message_from_self(ctx: hexchat.Context, mtype: str, content: str):
+    author = ctx.get_info("nick")
+    badges = userstates.get(ctxid(ctx), "")
+    message_emit(ctx, mtype, author, content, badges)

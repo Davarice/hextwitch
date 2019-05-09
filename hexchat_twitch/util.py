@@ -57,7 +57,7 @@ def plural(num: int, root="", end_plural="s", end_single=""):
     return root + (end_single if num == 1 else end_plural)
 
 
-def split_badges(bstring: str):
+def render_badges(bstring: str):
     if not bstring:
         return ""
     prefix = ""

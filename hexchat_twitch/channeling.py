@@ -4,6 +4,7 @@ import hexchat
 
 from hexchat_twitch.api import get_rooms
 from hexchat_twitch.config import cfg
+from hexchat_twitch.messaging import ServerMessage
 from hexchat_twitch.util import color_tab
 
 
@@ -60,9 +61,17 @@ def dm_post(author, channel, text, mtype):
     ctx = channel_get(channel)
 
 
-def dm_receive(message):
+def dm_receive(message: ServerMessage):
+    # TODO:
+    #   Create DM channel, if needed
+    #   Find DM channel ctx
+    #   Emit message FROM OTHER in DM channel
     pass
 
 
 def dm_send(message, channel):
+    # TODO:
+    #   Create DM channel, if needed
+    #   Find DM channel ctx
+    #   Emit message FROM SELF in DM channel
     pass

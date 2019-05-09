@@ -11,11 +11,11 @@ from typing import List
 
 import hexchat
 
-from hexchat_twitch import api, util
+from hexchat_twitch import api
 from hexchat_twitch.config import cfg
 from hexchat_twitch.channeling import dm_receive, dm_send
-from hexchat_twitch.messaging import HexMessage, ServerMessage, userstates
-from hexchat_twitch.util import ctxid
+from hexchat_twitch.messaging import ServerMessage, message_from_other, userstates
+from hexchat_twitch.util import ctxid, render_badges
 
 
 commands = {}
@@ -60,6 +60,7 @@ class HexTwitch:
         ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
             return hexchat.EAT_NONE
+        # TODO
 
     def cb_message_server(self, words: List[str], _: List[str], __, attrs):
         """A message is being received from Twitch. All we know initially is that
@@ -80,7 +81,7 @@ class HexTwitch:
             return hexchat.EAT_HEXCHAT
         elif message.mtype == "USERSTATE":
             # Receiving data about ourself.
-            userstates[ctxid(ctx)] = util.split_badges(message.tags["badges"])
+            userstates[ctxid(ctx)] = render_badges(message.tags["badges"])
             return hexchat.EAT_HEXCHAT
         elif message.mtype == "PRIVMSG":
             # Receiving a message. Save it for now and wait for it to come up.
@@ -138,8 +139,13 @@ class HexTwitch:
 
         if source_message:
             # This message has a ServerMessage twin. Apply tags.
-            message = HexMessage(mtype, name, text, pre, source_message)
-            message.emit()
+            message_from_other(
+                ctx,
+                mtype,
+                args[0],
+                args[1],
+                source_message,
+            )
             return hexchat.EAT_ALL
 
     def cb_message_user(self, args: List[str], _: List[str], mtype: str):
@@ -157,4 +163,5 @@ class HexTwitch:
         if not channel.startswith("#") or args[1].lower().startswith(".w "):
             # Channel does NOT start with #, OR the message DOES start with .w
             # This message is intended to be a Whisper/DM
+            # TODO
             return hexchat.EAT_ALL
