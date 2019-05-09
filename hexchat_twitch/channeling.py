@@ -3,6 +3,7 @@
 import hexchat
 
 from hexchat_twitch.api import get_rooms
+from hexchat_twitch.config import cfg
 from hexchat_twitch.util import color_tab
 
 
@@ -52,9 +53,7 @@ def channel_join(name):
             room_ = channel_get(room_true)
             if room_:
                 # Then, give it an alias of the form `#channel.room`.
-                room_.command(
-                    "settab #{}.{}".format(room.get("parent", ""), room.get("name", ""))
-                )
+                room_.command("settab " + cfg.get("tabs/room", "#{_id}").format(**room))
 
 
 def dm_post(author, channel, text, mtype):

@@ -1,2 +1,79 @@
-client_id:
-twitch_oauth:
+# Authentication codes: Used for joining Rooms in Twitch. Optional.
+auth:
+  client_id:
+  twitch_oauth:
+#
+
+# Twitch Badges: Characters to precede a username, representing their badges.
+# This also provides the order in which they are to be displayed.
+badges:
+  chars:
+    broadcaster: "🜲"  # Owner of the channel.
+
+    # Big Deal™ Badges.
+    staff: "⚙"  # Twitch Staff.
+    admin: "α"  # Twitch Administrator.
+    global-mod: "μ"  # Global Moderator.
+
+    # Channel Badges.
+    moderator: "🗡"  # Channel moderator.
+    vip: "⚑"
+    subscriber:  # Subscriber to the channel.
+      0: "①"
+      3: "③"
+      6: "⑥"
+      9: "⑨"
+      12: "ⅰ"
+      24: "ⅱ"
+      36: "ⅲ"
+      48: "ⅳ"
+      60: "ⅴ"
+    sub-gifter: ":"  # Has given gift subscriptions.
+    bits:  # Has given bits (number attached).
+      0: "▴"
+      100: "⬧"
+      1000: "⬠"
+      5000: "⬡"
+      10000: "🟋"
+      100000: "🟎"
+    bits-leader: "❖"
+
+    # Account Badges.
+    partner: "✓"  # "Verified" checkmark badge.
+    turbo: "+"  # Twitch Turbo.
+    premium: "±"  # Twitch Prime.
+  maxlen: 3
+  separate: " "
+#
+
+# Announcements for Subscriptions and related events.
+event:
+  lines:
+    bitsbadgetier: "<{subber}> earned a new tier of Bits Badge"
+    giftpaidupgrade: "<{subber}> upgraded their giftsub from {gifter}"
+    primepaidupgrade: "<{subber}> upgraded their Prime Sub"
+    resub: "<{subber}> resubscribed"
+    sub: "<{subber}> subscribed"
+    subgift: "<{subber}> was giftsubbed by {gifter}"
+    submysterygift: "<{gifter}> gives out ({subNumber}) gift subscription{s2}"
+  mods:
+    cumul: ", with ({cumul}) months in total"
+    first: ", starting a new streak"
+    message: ", saying: {msg}"
+    prime: ", with Twitch Prime"
+    streak: " for ({streak}) month{s1} in a row"
+#
+
+# Names to assign to plugin-managed Channel tabs
+tabs:
+  dm: =={}==
+  room: "#{parent}.{name}"
+#
+
+# Username enforcements. Replace parts of names, or cut off long ones.
+usernames:
+  replace:
+  too_long:
+    filler: "…"
+    limit: 0
+#

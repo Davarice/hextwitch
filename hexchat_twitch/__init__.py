@@ -14,7 +14,8 @@ import hexchat
 from hexchat_twitch import api, util
 from hexchat_twitch.config import cfg
 from hexchat_twitch.channeling import dm_receive, dm_send
-from hexchat_twitch.messaging import HexMessage, ServerMessage
+from hexchat_twitch.messaging import HexMessage, ServerMessage, userstates
+from hexchat_twitch.util import ctxid
 
 
 commands = {}
@@ -27,7 +28,6 @@ events_recv = {
 events_send = {"Your Message": 2, "Your Action": 2}
 
 
-userstates = {}
 inbox = deque([], 5)
 
 
@@ -79,10 +79,8 @@ class HexTwitch:
             # Nothing notable.
             return hexchat.EAT_HEXCHAT
         elif message.mtype == "USERSTATE":
-            # Receiving data about user.
-            userstates[
-                f'{ctx.get_info("network")}/{ctx.get_info("channel")}'
-            ] = util.split_badges(message.tags["badges"])
+            # Receiving data about ourself.
+            userstates[ctxid(ctx)] = util.split_badges(message.tags["badges"])
             return hexchat.EAT_HEXCHAT
         elif message.mtype == "PRIVMSG":
             # Receiving a message. Save it for now and wait for it to come up.

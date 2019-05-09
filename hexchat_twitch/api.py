@@ -17,9 +17,9 @@ def request(url, auth=False, v5=False):
     Send a query to a specified URL. This function mainly exists to apply the
         philosophy of DRY to the Request Header, which is always the same.
     """
-    headers = {"Client-ID": cfg.get("client_id", "")}
+    headers = {"Client-ID": cfg.get("auth/client_id") or ""}
     if auth:
-        headers["Authorization"] = "OAuth " + (cfg.twitch_oauth or "")
+        headers["Authorization"] = "OAuth " + (cfg.get("auth/twitch_oauth") or "")
     if v5:
         headers["Accept"] = "application/vnd.twitchtv.v5+json"
     return requests.get(url, headers=headers)
