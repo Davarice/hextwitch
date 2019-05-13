@@ -6,6 +6,7 @@ from typing import List, Tuple
 import hexchat
 
 from hexchat_twitch.config import cfg
+import ircrust
 
 
 # TODO: Put this in Config
@@ -75,27 +76,8 @@ def render_badges(bstring: str):
     return prefix[:cfg.get("badges/maxlen")] + cfg.get("badges/separate") if prefix else ""
 
 
-def split_tags(ircv3: bytes) -> Tuple[str, defaultdict]:
+def split_tags(ircv3: bytes) -> Tuple[str, str, List[str], str, defaultdict]:
     """Split a raw IRCv3 bytestring into a default dict and return it."""
-    string_full = ircv3.decode("utf-8")
-    tags_dict = defaultdict(str)
-    if string_full[0] == "@":
-        # Starting with @ indicates that the first half is Tags. The two
-        #   segments are separated by a space.
-        tags, text = string_full.split(" ", 1)
-
-        # for pair in tags[1:].split(";"):
-        #     if "=" in pair:
-        #         k, v = pair.split("=", 1)
-        #         tags_dict[k] = v
-
-        tags_dict = {
-            k: v
-            for k, v in [
-                pair.split("=", 1) for pair in tags[1:].split(";") if "=" in pair
-            ]
-        }
-    else:
-        # Otherwise, the whole thing is pure message.
-        text = string_full
-    return text, tags_dict
+    prefix, command, args, trail, tags = ircrust.decode(ircv3)
+    tags_dict = defaultdict(str, tags)
+    return prefix, command, args, trail, tags_dict

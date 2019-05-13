@@ -44,16 +44,10 @@ class ServerMessage:
         self.raw = raw
         self.ts = ts
         self.context = ctx
-        self.msg, self.tags = split_tags(raw)
 
-        comp = self.msg.split(" ", 3)
-        if len(comp) == 4:
-            self.hostname, self.mtype, self.channel, self.message = comp
-        else:
-            self.hostname, self.mtype, self.channel = comp
-            self.message = ""
+        self.prefix, self.mtype, self.args, self.message, self.tags = split_tags(raw)
 
-        self.author = self.hostname.split("!", 1)[0][1:]
+        self.author = self.prefix.split("!", 1)[0]
         self.ident = "/".join([str(ts), self.author, self.message])
 
 
