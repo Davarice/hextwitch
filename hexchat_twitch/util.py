@@ -68,12 +68,12 @@ def render_badges(bstring: str):
         #   1-year subscription badge. The entry in badge_chars can be a dict,
         #   and if it is, the keys should be integers. The highest key which is
         #   <= the rank is the key whose value is displayed.
-        icon = cfg.get("badges/chars").get(btype)
+        icon = cfg.get("badges/chars", {}).get(btype)
         if icon:
             if type(icon) == dict:
                 icon = str(icon.get(highest_below(icon, int(rank)), ""))
             prefix += icon
-    return prefix[:cfg.get("badges/maxlen")] + cfg.get("badges/separate") if prefix else ""
+    return prefix[:cfg.get("badges/maxlen", 3)] + cfg.get("badges/separate", " ") if prefix else ""
 
 
 def split_tags(ircv3: bytes) -> Tuple[str, str, List[str], str, defaultdict]:

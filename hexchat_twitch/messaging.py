@@ -15,6 +15,9 @@ from hexchat_twitch.util import ctxid, render_badges, split_tags
 userstates = {}
 
 
+print(repr(hexchat))
+
+
 class HexMessage:
     """Class representing a message printed in HexChat.
 
@@ -46,25 +49,26 @@ class ServerMessage:
         self.context = ctx
 
         self.prefix, self.mtype, self.args, self.message, self.tags = split_tags(raw)
+        self.msg = self.message
 
         self.author = self.prefix.split("!", 1)[0]
         self.ident = "/".join([str(ts), self.author, self.message])
 
 
 def message_emit(
-    ctx: hexchat.Context, mtype: str, author: str, content: str, badges: str
+    ctx, mtype: str, author: str, content: str, badges: str
 ):
     ctx.emit_print(mtype, author, content, badges)
 
 
 def message_from_other(
-    ctx: hexchat.Context, mtype: str, author: str, content: str, source: ServerMessage
+    ctx, mtype: str, author: str, content: str, source: ServerMessage
 ):
     badges = render_badges(source.tags.get("badges", {}))
     message_emit(ctx, mtype, author, content, badges)
 
 
-def message_from_self(ctx: hexchat.Context, mtype: str, content: str):
+def message_from_self(ctx, mtype: str, content: str):
     author = ctx.get_info("nick")
     badges = userstates.get(ctxid(ctx), "")
     message_emit(ctx, mtype, author, content, badges)

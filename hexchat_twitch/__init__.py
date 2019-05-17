@@ -11,11 +11,13 @@ from typing import List
 
 import hexchat
 
+print(repr(hexchat))
+
 from hexchat_twitch import api
 from hexchat_twitch.config import cfg
 from hexchat_twitch.channeling import dm_receive, dm_send
 from hexchat_twitch.messaging import ServerMessage, message_from_other, userstates
-from hexchat_twitch.util import ctxid, render_badges
+from hexchat_twitch.util import ctxid, color_tab, render_badges
 
 
 commands = {}
@@ -48,7 +50,7 @@ class HexTwitch:
             ctx = hexchat.get_context()
         except:
             return hexchat.EAT_NONE
-        util.color_tab(ctx, 0, True)
+        color_tab(ctx, 0, True)
         return hexchat.EAT_NONE
 
     def cb_message_send(self, words: List[str], _: List[str]):
@@ -76,8 +78,19 @@ class HexTwitch:
         if ctx.get_info("network").lower() != "twitch":
             return hexchat.EAT_NONE
         message = ServerMessage(words, attrs.ircv3, attrs.time, ctx)
-        if message.mtype == "ROOMSTATE":
-            # Nothing notable.
+        if message.mtype.isdigit() or message.mtype in [
+            "CAP",
+            "JOIN",
+            "MODE",
+            "NOTICE",
+            "PART",
+            "PING",
+            "PONG",
+        ]:
+            # Nothing notable. Let it pass.
+            return hexchat.EAT_NONE
+        elif message.mtype in ["ROOMSTATE"]:
+            # Nothing notable. Kill it.
             return hexchat.EAT_HEXCHAT
         elif message.mtype == "USERSTATE":
             # Receiving data about ourself.
@@ -107,7 +120,7 @@ class HexTwitch:
             # Unknown event type. Make a note of it.
             self.echo(
                 "Unknown event of type '{}' in {}: {}".format(
-                    message.mtype, ctx.get_info("channel"), message.msg
+                    message.mtype, ctx.get_info("channel"), message.message
                 )
             )
             return hexchat.EAT_NONE
@@ -124,9 +137,8 @@ class HexTwitch:
         ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
             return hexchat.EAT_NONE
-        name, text, pre = args
         ts = attr.time
-        ident = "/".join([str(ts), name, text])
+        ident = "/".join([str(ts), args[0], args[1]])
 
         source_message = None
         # Try to find the identifier in the inbox.
@@ -139,13 +151,7 @@ class HexTwitch:
 
         if source_message:
             # This message has a ServerMessage twin. Apply tags.
-            message_from_other(
-                ctx,
-                mtype,
-                args[0],
-                args[1],
-                source_message,
-            )
+            message_from_other(ctx, mtype, args[0], args[1], source_message)
             return hexchat.EAT_ALL
 
     def cb_message_user(self, args: List[str], _: List[str], mtype: str):

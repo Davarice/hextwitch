@@ -10,12 +10,16 @@ to the Python interface. As of this writing, the main branch DOES NOT support
 this.
 """
 
+from pathlib import Path
+import sys
+
 # The "hexchat" module does not actually exist anywhere we can consistently find
 #   it. However, its API is documented here:
 # https://hexchat.readthedocs.io/en/latest/script_python.html
 import hexchat
 
-import hexchat_twitch.__init__ as plugin
+sys.path.append(str(Path.home() / "Development/git/hextwitch"))
+import hexchat_twitch as plugin
 
 
 # Set information that will be displayed in the HexChat Addons list.
@@ -35,7 +39,7 @@ hexchat.hook_command("say", Twitch.cb_message_send)
 hexchat.hook_print("Focus Tab", Twitch.cb_focus, priority=hexchat.PRI_LOW)
 
 for event in plugin.events_recv:
-    hexchat.hook_print(event, Twitch.cb_message_hex, userdata=event)
+    hexchat.hook_print_attrs(event, Twitch.cb_message_hex, userdata=event)
 
 for event in plugin.events_send:
     hexchat.hook_print(event, Twitch.cb_message_user, userdata=event)
