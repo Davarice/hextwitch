@@ -59,19 +59,24 @@ def channel_join(name):
 
 def dm_post(author, channel, text, mtype):
     ctx = channel_get(channel)
+    if not ctx:
+        channel_add(channel, "=={}==".format(channel))
+        ctx = channel_get(channel)
+        if not ctx:
+            print("Cannot make DM tab '{}'".format(channel))
+            return
+    ntype = to_private.get(mtype, "Private Message to Dialog")
+    ctx.emit_print(ntype, author, text)
 
 
 def dm_receive(message: ServerMessage):
-    # TODO:
-    #   Create DM channel, if needed
-    #   Find DM channel ctx
-    #   Emit message FROM OTHER in DM channel
-    pass
+    dm_post(message.author, message.author, message.message, message.mtype)
 
 
-def dm_send(message, channel):
-    # TODO:
-    #   Create DM channel, if needed
-    #   Find DM channel ctx
-    #   Emit message FROM SELF in DM channel
-    pass
+def dm_send(author, channel, text, mtype):
+    dm_post(author, channel, text, mtype)
+    twitch = hexchat.find_context("Twitch")
+    if twitch:
+        twitch.command("say .w {} {}".format(channel, text))
+    else:
+        print("Cannot send DM to {}.".format(channel))

@@ -9,13 +9,10 @@ from typing import List
 import hexchat
 
 from hexchat_twitch.config import cfg
-from hexchat_twitch.util import ctxid, render_badges, split_tags
+from hexchat_twitch.util import ctxid, color_tab, render_badges, split_tags
 
 
 userstates = {}
-
-
-print(repr(hexchat))
 
 
 class HexMessage:
@@ -49,16 +46,19 @@ class ServerMessage:
         self.context = ctx
 
         self.prefix, self.mtype, self.args, self.message, self.tags = split_tags(raw)
-        self.msg = self.message
 
         self.author = self.prefix.split("!", 1)[0]
-        self.ident = "/".join([str(ts), self.author, self.message])
+        self.ident = "/".join([str(ts), self.author, hexchat.strip(self.message)])
+
+    def __str__(self):
+        return self.ident
 
 
 def message_emit(
     ctx, mtype: str, author: str, content: str, badges: str
 ):
     ctx.emit_print(mtype, author, content, badges)
+    color_tab(ctx, 1)
 
 
 def message_from_other(

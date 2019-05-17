@@ -3,6 +3,9 @@ Module dedicated to interfacing with the Twitch API
 """
 
 import requests
+from typing import List
+
+import hexchat
 
 from hexchat_twitch.config import cfg
 
@@ -62,3 +65,14 @@ def get_rooms(channel):
     else:
         out = {}
     return out
+
+
+def cb_join_channel(words: List[str], _: List[str], self):
+    """The HexChat command `/join` has just been invoked. Find all Rooms of
+        the channel being joined, and join them too.
+    """
+    self.echo(str(words))
+    ctx = hexchat.get_context()
+    if ctx.get_info("network").lower() != "twitch":
+        return hexchat.EAT_NONE
+    # TODO

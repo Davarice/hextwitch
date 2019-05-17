@@ -4,18 +4,15 @@ Copyright (C) 2019 @Davarice
 Free Software under GPLv3
 """
 
-VERSION = "0.0.4-dev0"
+VERSION = "0.0.6-dev0"
 
 from collections import deque
 from typing import List
 
 import hexchat
 
-print(repr(hexchat))
-
-from hexchat_twitch import api
 from hexchat_twitch.config import cfg
-from hexchat_twitch.channeling import dm_receive, dm_send
+from hexchat_twitch.channeling import dm_post, dm_receive, dm_send
 from hexchat_twitch.messaging import ServerMessage, message_from_other, userstates
 from hexchat_twitch.util import ctxid, color_tab, render_badges
 
@@ -28,6 +25,8 @@ events_recv = {
     "Channel Action Hilight": 3,
 }
 events_send = {"Your Message": 2, "Your Action": 2}
+ignore_and_allow = ["CAP", "JOIN", "MODE", "NOTICE", "PART", "PING", "PONG"]
+ignore_and_eat = ["ROOMSTATE"]
 
 
 inbox = deque([], 5)
@@ -53,12 +52,13 @@ class HexTwitch:
         color_tab(ctx, 0, True)
         return hexchat.EAT_NONE
 
-    def cb_message_send(self, words: List[str], _: List[str]):
+    def cb_message_send(self, words: List[str], _: List[str], __=None):
         """The HexChat command `/say` has just been invoked. This means that the
             user has typed and sent a message. Intercept it, and check whether
             it has been typed into a Twitch Whisper channel. If it has, do not
             send it as a `/say text`; Instead, send it as a `/w username text`.
         """
+        self.echo(str(words))
         ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
             return hexchat.EAT_NONE
@@ -78,18 +78,11 @@ class HexTwitch:
         if ctx.get_info("network").lower() != "twitch":
             return hexchat.EAT_NONE
         message = ServerMessage(words, attrs.ircv3, attrs.time, ctx)
-        if message.mtype.isdigit() or message.mtype in [
-            "CAP",
-            "JOIN",
-            "MODE",
-            "NOTICE",
-            "PART",
-            "PING",
-            "PONG",
-        ]:
+        if message.mtype.isdigit() or message.mtype in ignore_and_allow:
             # Nothing notable. Let it pass.
+            color_tab(ctx, 1)
             return hexchat.EAT_NONE
-        elif message.mtype in ["ROOMSTATE"]:
+        elif message.mtype in ignore_and_eat:
             # Nothing notable. Kill it.
             return hexchat.EAT_HEXCHAT
         elif message.mtype == "USERSTATE":
@@ -138,21 +131,20 @@ class HexTwitch:
         if ctx.get_info("network").lower() != "twitch":
             return hexchat.EAT_NONE
         ts = attr.time
+        args = [hexchat.strip(arg) for arg in args]
         ident = "/".join([str(ts), args[0], args[1]])
 
-        source_message = None
         # Try to find the identifier in the inbox.
+        # self.echo(str(inbox))
         for m in inbox:
             if m.ident == ident:
                 # Found one. Remove it from the inbox, and process it.
-                source_message = m
+                # self.echo("`{}` == `{}`".format(repr(m.ident), repr(ident)))
                 inbox.remove(m)
-                break
-
-        if source_message:
-            # This message has a ServerMessage twin. Apply tags.
-            message_from_other(ctx, mtype, args[0], args[1], source_message)
-            return hexchat.EAT_ALL
+                message_from_other(ctx, mtype, args[0], args[1], m)
+                return hexchat.EAT_ALL
+            # else:
+            #     self.echo("`{}` != `{}`".format(repr(m.ident), repr(ident)))
 
     def cb_message_user(self, args: List[str], _: List[str], mtype: str):
         """A message is being posted in HexChat. All we know initially is that
@@ -166,8 +158,17 @@ class HexTwitch:
             return hexchat.EAT_NONE
 
         channel = ctx.get_info("channel")
-        if not channel.startswith("#") or args[1].lower().startswith(".w "):
-            # Channel does NOT start with #, OR the message DOES start with .w
+        if args[1].lower().startswith(".w "):
+            comps = args[1].split(maxsplit=2)
+            comps.pop(0)
+            if comps:
+                dest = comps.pop(0)
+                if comps:
+                    dm_post(args[0], dest, comps[0], mtype)
+            return hexchat.EAT_NONE
+        elif not channel.startswith("#"):
+            # Channel does NOT start with #
             # This message is intended to be a Whisper/DM
             # TODO
-            return hexchat.EAT_ALL
+            dm_send(args[0], channel, args[1], mtype)
+            return hexchat.EAT_HEXCHAT

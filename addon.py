@@ -35,7 +35,7 @@ Twitch = plugin.HexTwitch()
 
 # Set up all necessary Callbacks.
 hexchat.hook_server_attrs("RAW LINE", Twitch.cb_message_server)
-hexchat.hook_command("say", Twitch.cb_message_send)
+# hexchat.hook_command("say", Twitch.cb_message_send)
 hexchat.hook_print("Focus Tab", Twitch.cb_focus, priority=hexchat.PRI_LOW)
 
 for event in plugin.events_recv:
@@ -45,7 +45,7 @@ for event in plugin.events_send:
     hexchat.hook_print(event, Twitch.cb_message_user, userdata=event)
 
 for key, (func, ht) in plugin.commands.items():
-    hexchat.hook_command(key, func, help=ht)
+    hexchat.hook_command(key, func, Twitch, help=ht)
 
 
 Twitch.echo("{} v{} loaded.".format(__module_name__, __module_version__), "Motd")
