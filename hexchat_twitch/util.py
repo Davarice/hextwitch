@@ -40,7 +40,7 @@ def color_tab(ctx, n=0, reset=False):
         # If the new color is "more important", or the function is called with
         #   the reset flag, change it
         tab_colors[tab_name] = n
-        ctx.command("gui color {}".format(str(n)))
+        ctx.command(f"gui color {n}")
 
 
 def highest_below(seq: List[int], limit: int):
@@ -73,7 +73,11 @@ def render_badges(bstring: str):
             if type(icon) == dict:
                 icon = str(icon.get(highest_below(icon, int(rank)), ""))
             prefix += icon
-    return prefix[:cfg.get("badges/maxlen", 3)] + cfg.get("badges/separate", " ") if prefix else ""
+    return (
+        prefix[: cfg.get("badges/maxlen", 3)] + cfg.get("badges/separate", " ")
+        if prefix
+        else ""
+    )
 
 
 def split_tags(ircv3: bytes) -> Tuple[str, str, List[str], str, defaultdict]:

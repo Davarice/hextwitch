@@ -4,7 +4,7 @@ Copyright (C) 2019 @Davarice
 Free Software under GPLv3
 """
 
-VERSION = "0.0.6-dev0"
+VERSION = "0.0.7-dev0"
 
 from collections import deque
 from typing import List
@@ -112,9 +112,8 @@ class HexTwitch:
         else:
             # Unknown event type. Make a note of it.
             self.echo(
-                "Unknown event of type '{}' in {}: {}".format(
-                    message.mtype, ctx.get_info("channel"), message.message
-                )
+                f"Unknown event of type {message.mtype!r}"
+                f" in {ctx.get_info('channel')}: {message.message}"
             )
             return hexchat.EAT_NONE
 

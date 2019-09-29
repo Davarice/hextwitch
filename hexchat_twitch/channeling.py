@@ -31,9 +31,9 @@ def channel_add(name, alias):
 
 
 def channel_get(name):
+    """Find the channel with the given name on the Twitch server."""
     name = name.lower()
     ctx = hexchat.find_context("Twitch", name)
-    # Find the channel with the given name on the Twitch server.
     return ctx
 
 
@@ -49,7 +49,7 @@ def channel_join(name):
                 ["#chatrooms", str(room.get("owner_id", 0)), str(room.get("_id", 0))]
             )
             # Execute the JOIN command to connect to the Room.
-            ctx.command("join " + room_true)
+            ctx.command(f"join {room_true}")
             # Find the newly opened tab.
             room_ = channel_get(room_true)
             if room_:
@@ -63,7 +63,7 @@ def dm_post(author, channel, text, mtype):
         channel_add(channel, "=={}==".format(channel))
         ctx = channel_get(channel)
         if not ctx:
-            print("Cannot make DM tab '{}'".format(channel))
+            print(f"Cannot make DM tab '{channel}'")
             return
     ntype = to_private.get(mtype, "Private Message to Dialog")
     ctx.emit_print(ntype, author, text)
@@ -77,6 +77,6 @@ def dm_send(author, channel, text, mtype):
     dm_post(author, channel, text, mtype)
     twitch = hexchat.find_context("Twitch")
     if twitch:
-        twitch.command("say .w {} {}".format(channel, text))
+        twitch.command(f"say .w {channel} {text}")
     else:
-        print("Cannot send DM to {}.".format(channel))
+        print(f"Cannot send DM to {channel}.")

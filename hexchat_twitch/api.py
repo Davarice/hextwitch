@@ -22,7 +22,7 @@ def request(url, auth=False, v5=False):
     """
     headers = {"Client-ID": cfg.get("auth/client_id") or ""}
     if auth:
-        headers["Authorization"] = "OAuth " + (cfg.get("auth/twitch_oauth") or "")
+        headers["Authorization"] = f"OAuth {(cfg.get('auth/twitch_oauth') or '')}"
     if v5:
         headers["Accept"] = "application/vnd.twitchtv.v5+json"
     return requests.get(url, headers=headers)
@@ -37,9 +37,9 @@ def make_url(qtype: str, prefix: str, logins: list) -> str:
     :param logins: A List of Queries to be made. Typically usernames.
     :return: A constructed Query URL that will return channel information.
     """
-    print("info", "Querying '" + qtype + "'...")
-    names = "&".join([prefix + login for login in logins])
-    return baseurl + qtype + "?" + names
+    print("info", f"Querying '{qtype}'...")
+    names = "&".join(prefix + login for login in logins)
+    return f"{baseurl}{qtype}?{names}"
 
 
 def id_from_name(name):
@@ -53,9 +53,7 @@ def id_from_name(name):
 def get_rooms(channel):
     uid = id_from_name(channel)
     if uid:
-        ret = request(
-            "https://api.twitch.tv/kraken/chat/{}/rooms".format(uid), True, True
-        )
+        ret = request(f"https://api.twitch.tv/kraken/chat/{uid}/rooms", True, True)
         if ret.status_code == requests.codes.ok:
             out = ret.json()
             for room in out["rooms"]:

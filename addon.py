@@ -48,4 +48,4 @@ for key, (func, ht) in plugin.commands.items():
     hexchat.hook_command(key, func, Twitch, help=ht)
 
 
-Twitch.echo("{} v{} loaded.".format(__module_name__, __module_version__), "Motd")
+Twitch.echo(f"{__module_name__} v{__module_version__} loaded.", "Motd")

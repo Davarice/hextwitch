@@ -33,9 +33,7 @@ def ensure_key(data, key: str):
         appropriate type to be used as a subscription of the data.
     """
     err = ValueError(
-        "{} is not a valid subscript value for type '{}'.".format(
-            repr(key), type(data).__name__
-        )
+        f"{key!r} is not a valid subscript value for type {type(data).__name__!r}."
     )
     if type(data) == dict:
         true_key = key
