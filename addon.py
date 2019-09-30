@@ -13,9 +13,6 @@ NOTE: This plugin --MUST-- be used with a version of HexChat that exposes IRCv3
 from pathlib import Path
 import sys
 
-# The "hexchat" module does not actually exist anywhere we can consistently find
-#   it. However, its API is documented here:
-# https://hexchat.readthedocs.io/en/latest/script_python.html
 import hexchat
 
 sys.path.append(str(Path.home() / "Development/git/hextwitch"))

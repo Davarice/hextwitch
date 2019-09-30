@@ -52,68 +52,67 @@ class HexTwitch:
         color_tab(ctx, 0, True)
         return hexchat.EAT_NONE
 
-    def cb_message_send(self, words: List[str], _: List[str], __=None):
-        """The HexChat command `/say` has just been invoked. This means that the
-            user has typed and sent a message. Intercept it, and check whether
-            it has been typed into a Twitch Whisper channel. If it has, do not
-            send it as a `/say text`; Instead, send it as a `/w username text`.
-        """
-        self.echo(str(words))
-        ctx = hexchat.get_context()
-        if ctx.get_info("network").lower() != "twitch":
-            return hexchat.EAT_NONE
-        # TODO
-
     def cb_message_server(self, words: List[str], _: List[str], __, attrs):
         """A message is being received from Twitch. All we know initially is that
             `attrs` is an object with attributes `time` and `ircv3`.
             Deal with it.
 
-        DEVELOPER NOTE: This method is the Callback hooked by way of this:
+        NOTE: This method is the Callback hooked by way of this:
                 `hexchat.hook_server_attrs("RAW LINE", *_)`.
-        If HexChat changes what attributes are given, THIS IS THE `attrs` WHERE
-            THAT MATTERS.
+            If HexChat changes what attributes are given, THIS IS THE `attrs`
+            WHERE THAT MATTERS.
         """
         ctx = hexchat.get_context()
         if ctx.get_info("network").lower() != "twitch":
             return hexchat.EAT_NONE
         message = ServerMessage(words, attrs.ircv3, attrs.time, ctx)
+
         if message.mtype.isdigit() or message.mtype in ignore_and_allow:
             # Nothing notable. Let it pass.
             color_tab(ctx, 1)
             return hexchat.EAT_NONE
+
         elif message.mtype in ignore_and_eat:
             # Nothing notable. Kill it.
             return hexchat.EAT_HEXCHAT
+
         elif message.mtype == "USERSTATE":
             # Receiving data about ourself.
             userstates[ctxid(ctx)] = render_badges(message.tags["badges"])
             return hexchat.EAT_HEXCHAT
+
         elif message.mtype == "PRIVMSG":
             # Receiving a message. Save it for now and wait for it to come up.
             inbox.append(message)
             return hexchat.EAT_NONE
+
         elif message.mtype == "USERNOTICE":
             # Notable event; Subscription or Raid.
             return  # TODO
+
         elif message.mtype == "WHISPER":
             # Receiving a Twitch Whisper (DM). Put it in its own tab.
             dm_receive(message)
             return hexchat.EAT_ALL
+
         elif message.mtype == "HOSTTARGET":
             # This channel has started hosting. Print a direct link.
             return  # TODO
+
         elif message.mtype == "CLEARCHAT":
             # A user has been purged. Either a timeout or a ban.
             return  # TODO
+
         elif message.mtype == "CLEARMSG":
             # A message has been selectively deleted. Repost it.
             return  # TODO
+
         else:
             # Unknown event type. Make a note of it.
             self.echo(
                 f"Unknown event of type {message.mtype!r}"
-                f" in {ctx.get_info('channel')}: {message.message}"
+                f" in {ctx.get_info('channel')}:"
+                f" {message.message or message.tags.get('system-msg', message.tags)}"
             )
             return hexchat.EAT_NONE
 

@@ -48,15 +48,13 @@ class ServerMessage:
         self.prefix, self.mtype, self.args, self.message, self.tags = split_tags(raw)
 
         self.author = self.prefix.split("!", 1)[0]
-        self.ident = "/".join([str(ts), self.author, hexchat.strip(self.message)])
+        self.ident = f"{ts}/{self.author}/{hexchat.strip(self.message)}"
 
     def __str__(self):
         return self.ident
 
 
-def message_emit(
-    ctx, mtype: str, author: str, content: str, badges: str
-):
+def message_emit(ctx, mtype: str, author: str, content: str, badges: str):
     ctx.emit_print(mtype, author, content, badges)
     color_tab(ctx, 1)
 
