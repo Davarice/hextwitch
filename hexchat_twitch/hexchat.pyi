@@ -5,7 +5,7 @@ Contains no functionality. Only Signatures.
 (Incomplete)
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, NewType, Optional, Type, TypeVar, Union
 
 
 PRI_HIGHEST = 5
@@ -52,6 +52,85 @@ def get_list(type: str) -> List:
     ...
 
 
+class Attribute(object):
+    ircv3: Dict[str, Any] = {}  # Only available by modding the Hexchat Source.
+    time: float = 0
+
+
+Userdata = TypeVar("Userdata")
+HookHandler = NewType("Handler", Any)
+Callback: Type[Callable] = Callable[[List[str], List[str], Userdata], HookHandler]
+CallbackAttrs: Type[Callable] = Callable[
+    [List[str], List[str], Userdata, Attribute],
+    HookHandler,
+]
+
+
+def hook_command(
+    name: str,
+    callback: Callback,
+    userdata: Userdata = None,
+    priority=PRI_NORM,
+    help: str = None,
+) -> HookHandler:
+    ...
+
+
+def hook_print(
+    name: str,
+    callback: Callback,
+    userdata: Userdata = None,
+    priority=PRI_NORM,
+) -> HookHandler:
+    ...
+
+
+def hook_print_attrs(
+    name: str,
+    callback: CallbackAttrs,
+    userdata: Userdata = None,
+    priority=PRI_NORM,
+) -> HookHandler:
+    ...
+
+
+def hook_server(
+    name: str,
+    callback: Callback,
+    userdata: Userdata = None,
+    priority=PRI_NORM,
+) -> HookHandler:
+    ...
+
+
+def hook_server_attrs(
+    name: str,
+    callback: CallbackAttrs,
+    userdata: Userdata = None,
+    priority=PRI_NORM,
+) -> HookHandler:
+    ...
+
+
+def hook_timer(
+    timer: float,
+    callback: Callback,
+    userdata: Userdata = None,
+) -> HookHandler:
+    ...
+
+
+def hook_unload(
+    callback: Callback,
+    userdata: Userdata = None,
+) -> HookHandler:
+    ...
+
+
+def unhook(handler: HookHandler):
+    ...
+
+
 def set_pluginpref(name: str, value) -> bool:
     ...
 
@@ -68,12 +147,7 @@ def list_pluginpref() -> List[str]:
     ...
 
 
-class Attribute(object):
-    ircv3: Dict[str, Any] = {}  # Only available by modding the Hexchat Source.
-    time: int = 0
-
-
-class context(object):
+class Context(object):
     def set(self):
         ...
 
@@ -97,9 +171,9 @@ class context(object):
         ...
 
 
-def get_context() -> context:
+def get_context() -> Context:
     ...
 
 
-def find_context(server: str = None, channel: str = None) -> context:
+def find_context(server: str = None, channel: str = None) -> Context:
     ...
