@@ -11,20 +11,13 @@ from typing import List
 
 import hexchat
 
-from hexchat_twitch.config import cfg
-from hexchat_twitch.channeling import dm_post, dm_receive, dm_send
-from hexchat_twitch.messaging import ServerMessage, message_from_other, userstates
-from hexchat_twitch.util import ctxid, color_tab, echo, render_badges
+from .config import cfg
+from .channeling import dm_post, dm_receive, dm_send
+from .messaging import message_from_other, ServerMessage, userstates
+from .util import ctxid, color_tab, echo, render_badges
 
 
 commands = {}
-events_recv = {
-    "Channel Message": 2,
-    "Channel Action": 2,
-    "Channel Msg Hilight": 3,
-    "Channel Action Hilight": 3,
-}
-events_send = {"Your Message": 2, "Your Action": 2}
 ignore_and_allow = ["CAP", "JOIN", "MODE", "NOTICE", "PART", "PING", "PONG"]
 ignore_and_eat = ["ROOMSTATE"]
 
@@ -81,7 +74,7 @@ def cb_message_server(words: List[str], _: List[str], __, attrs):
 
     elif message.mtype == "PRIVMSG":
         # Receiving a message. Save it for now and wait for it to come up.
-        inbox.append(message)
+        inbox.appendleft(message)
         return hexchat.EAT_NONE
 
     elif message.mtype == "USERNOTICE":
@@ -108,8 +101,7 @@ def cb_message_server(words: List[str], _: List[str], __, attrs):
     else:
         # Unknown event type. Make a note of it.
         echo(
-            f"Unknown event {message.mtype!r}: "
-            + message.message
+            f"Unknown event {message.mtype!r}: " + message.message
             or message.tags.get("system-msg", message.tags).replace("\s", " "),
             ctx=ctx,
         )
@@ -131,7 +123,7 @@ def cb_message_hex(args: List[str], _: List[str], mtype: str, attr):
         return hexchat.EAT_NONE
     ts = attr.time
     args = [hexchat.strip(arg) for arg in args]
-    ident = "/".join([str(ts), args[0], args[1]])
+    ident = f"{ts}/{args[0]}"
 
     # Try to find the identifier in the inbox.
     # self.echo(str(inbox))

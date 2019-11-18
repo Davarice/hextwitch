@@ -32,10 +32,10 @@ hexchat.hook_server_attrs("RAW LINE", plugin.cb_message_server)
 # hexchat.hook_command("say", plugin.cb_message_send)
 hexchat.hook_print("Focus Tab", plugin.cb_focus, priority=hexchat.PRI_LOW)
 
-for event in plugin.events_recv:
+for event in plugin.messaging.events_recv:
     hexchat.hook_print_attrs(event, plugin.cb_message_hex, userdata=event)
 
-for event in plugin.events_send:
+for event in plugin.messaging.events_send:
     hexchat.hook_print(event, plugin.cb_message_user, userdata=event)
 
 for key, (func, ht) in plugin.commands.items():

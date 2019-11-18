@@ -51,6 +51,21 @@ def plural(
     return f"{root}{end_single if num == 1 else end_plural}"
 
 
+nrep = cfg["usernames/replace", {}].items()
+nfill = cfg["usernames/too_long/filler", ""]
+nlim = cfg["usernames/too_long/limit", 0]
+
+
+def rename(name: str) -> str:
+    for pre, post in nrep:
+        name = name.replace(pre, post)
+
+    if nlim and len(name) > nlim:
+        name = name[: nlim - len(nfill)] + nfill
+
+    return name
+
+
 def render_badges(bstring: str) -> str:
     if not bstring:
         return ""
