@@ -2,12 +2,12 @@
 Module dedicated to interfacing with the Twitch API
 """
 
-import requests
 from typing import List
 
 import hexchat
+import requests
 
-from hexchat_twitch.config import cfg
+from .config import cfg
 
 
 baseurl = "https://api.twitch.tv/helix/"
@@ -15,7 +15,7 @@ games_cache = {}
 temps = []
 
 
-def request(url, auth=False, v5=False):
+def request(url, auth: bool = False, v5: bool = False) -> requests.Response:
     """
     Send a query to a specified URL. This function mainly exists to apply the
         philosophy of DRY to the Request Header, which is always the same.
@@ -28,7 +28,7 @@ def request(url, auth=False, v5=False):
     return requests.get(url, headers=headers)
 
 
-def make_url(qtype: str, prefix: str, logins: list) -> str:
+def make_url(qtype: str, prefix: str, logins: List[str]) -> str:
     """
     Construct a Query URL based on a Query Type, a Prefix for each Query, and a
         List of Keys to query.
@@ -38,31 +38,32 @@ def make_url(qtype: str, prefix: str, logins: list) -> str:
     :return: A constructed Query URL that will return channel information.
     """
     print("info", f"Querying '{qtype}'...")
-    names = "&".join(prefix + login for login in logins)
+    names = "&".join(f"{prefix}{login}" for login in logins)
     return f"{baseurl}{qtype}?{names}"
 
 
-def id_from_name(name):
-    req = request(make_url("users", "login=", [name]))
-    if req.status_code == requests.codes.ok:
-        return req.json()["data"][0]["id"]
-    else:
+def id_from_name(name) -> int:
+    # req = request(make_url("users", "login=", [name]))
+    # if req.status_code == requests.codes.ok:
+    #     return req.json()["data"][0]["id"]
+    # else:
         return 0
 
 
-def get_rooms(channel):
-    uid = id_from_name(channel)
-    if uid:
-        ret = request(f"https://api.twitch.tv/kraken/chat/{uid}/rooms", True, True)
-        if ret.status_code == requests.codes.ok:
-            out = ret.json()
-            for room in out["rooms"]:
-                room["parent"] = channel
-        else:
-            out = {}
-    else:
-        out = {}
-    return out
+def get_rooms(channel) -> dict:
+    return {}
+    # uid = id_from_name(channel)
+    # if uid:
+    #     ret = request(f"https://api.twitch.tv/kraken/chat/{uid}/rooms", True, True)
+    #     if ret.status_code == requests.codes.ok:
+    #         out = ret.json()
+    #         for room in out["rooms"]:
+    #             room["parent"] = channel
+    #     else:
+    #         out = {}
+    # else:
+    #     out = {}
+    # return out
 
 
 def cb_join_channel(words: List[str], _: List[str], self):

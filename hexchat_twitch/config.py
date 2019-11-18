@@ -10,7 +10,7 @@ Uses YAML by default, but can be easily modified to accept any file format which
 """
 
 from pathlib import Path
-from typing import Union
+from typing import Any, Tuple, Union
 
 import oyaml
 
@@ -18,7 +18,7 @@ import oyaml
 cfg_dirs = ["~/.config/hexchat", "~/"]
 
 
-def read_file(path: Path):
+def read_file(path: Path) -> dict:
     newfile = path.resolve()
     if newfile.is_file():
         with newfile.open("r") as file:
@@ -47,7 +47,7 @@ def ensure_key(data, key: str):
     return true_key
 
 
-def set_value(data, key, value):
+def set_value(data, key, value) -> bool:
     """Given a data structure, a key, and a new value destined for `data[key]`,
         first ensure the key, and then ensure that the value can be assigned to
         `data[key]`.
@@ -179,6 +179,12 @@ class ConfigReader:
             return object.__getattribute__(self, attr)
         except AttributeError:
             return self.get(attr)
+
+    def __getitem__(self, key: Union[str, Tuple[str, Any]]):
+        if isinstance(key, tuple):
+            return self.get(*key)
+        else:
+            return self.get(key)
 
 
 cfg = ConfigReader()

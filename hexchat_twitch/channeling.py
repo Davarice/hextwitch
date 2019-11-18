@@ -1,11 +1,13 @@
 """Module for controlling channels and tabs."""
 
+from typing import Optional
+
 import hexchat
 
-from hexchat_twitch.api import get_rooms
-from hexchat_twitch.config import cfg
-from hexchat_twitch.messaging import ServerMessage
-from hexchat_twitch.util import color_tab
+from .api import get_rooms
+from .config import cfg
+from .messaging import ServerMessage
+from .util import color_tab
 
 
 channels = {}
@@ -19,7 +21,7 @@ to_private = {
 }
 
 
-def channel_add(name, alias):
+def channel_add(name, alias) -> Optional["hexchat.Context"]:
     server = hexchat.find_context("Twitch")
     if server:
         server.command("query " + name)
@@ -30,7 +32,7 @@ def channel_add(name, alias):
     return None
 
 
-def channel_get(name):
+def channel_get(name) -> "hexchat.Context":
     """Find the channel with the given name on the Twitch server."""
     name = name.lower()
     ctx = hexchat.find_context("Twitch", name)

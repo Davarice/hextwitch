@@ -8,8 +8,8 @@ from typing import List
 
 import hexchat
 
-from hexchat_twitch.config import cfg
-from hexchat_twitch.util import ctxid, color_tab, render_badges, split_tags
+from .config import cfg
+from .util import ctxid, color_tab, render_badges, split_tags
 
 
 userstates = {}
