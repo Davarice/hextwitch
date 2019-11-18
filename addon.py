@@ -27,22 +27,19 @@ __module_description__ = (
     'Subscription notifications, name shortening, user "badges", and more.'
 )
 
-# Initialize the plugin.
-Twitch = plugin.HexTwitch()
-
 # Set up all necessary Callbacks.
-hexchat.hook_server_attrs("RAW LINE", Twitch.cb_message_server)
-# hexchat.hook_command("say", Twitch.cb_message_send)
-hexchat.hook_print("Focus Tab", Twitch.cb_focus, priority=hexchat.PRI_LOW)
+hexchat.hook_server_attrs("RAW LINE", plugin.cb_message_server)
+# hexchat.hook_command("say", plugin.cb_message_send)
+hexchat.hook_print("Focus Tab", plugin.cb_focus, priority=hexchat.PRI_LOW)
 
 for event in plugin.events_recv:
-    hexchat.hook_print_attrs(event, Twitch.cb_message_hex, userdata=event)
+    hexchat.hook_print_attrs(event, plugin.cb_message_hex, userdata=event)
 
 for event in plugin.events_send:
-    hexchat.hook_print(event, Twitch.cb_message_user, userdata=event)
+    hexchat.hook_print(event, plugin.cb_message_user, userdata=event)
 
 for key, (func, ht) in plugin.commands.items():
-    hexchat.hook_command(key, func, Twitch, help=ht)
+    hexchat.hook_command(key, func, plugin, help=ht)
 
 
-Twitch.echo(f"{__module_name__} v{__module_version__} loaded.", "Motd")
+plugin.echo(f"{__module_name__} v{__module_version__} loaded.", "Motd")
