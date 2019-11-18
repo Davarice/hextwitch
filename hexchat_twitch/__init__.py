@@ -14,7 +14,7 @@ import hexchat
 from hexchat_twitch.config import cfg
 from hexchat_twitch.channeling import dm_post, dm_receive, dm_send
 from hexchat_twitch.messaging import ServerMessage, message_from_other, userstates
-from hexchat_twitch.util import ctxid, color_tab, render_badges
+from hexchat_twitch.util import ctxid, color_tab, echo, render_badges
 
 
 commands = {}
@@ -33,10 +33,6 @@ inbox = deque([], 5)
 
 
 cfg.load("config.yml", False)
-
-
-def echo(text: str, type_: str = "Server Error", ctx=None):
-    (ctx or hexchat).emit_print(type_, text)
 
 
 # ===--
@@ -112,10 +108,12 @@ def cb_message_server(words: List[str], _: List[str], __, attrs):
     else:
         # Unknown event type. Make a note of it.
         echo(
-            f"Unknown event of type {message.mtype!r}"
-            f" in {ctx.get_info('channel')}:"
-            f" {message.message or message.tags.get('system-msg', message.tags)}"
+            f"Unknown event {message.mtype!r}: "
+            + message.message
+            or message.tags.get("system-msg", message.tags).replace("\s", " "),
+            ctx=ctx,
         )
+        color_tab(ctx, 1)
         return hexchat.EAT_NONE
 
 

@@ -150,7 +150,7 @@ class ConfigReader:
             #   under the current structure.
             set_value(here, route.pop(0), value)
 
-    def load(self, filepath: str = "", follow=True):
+    def load(self, filepath: str = "", follow: bool = True):
         """Locate and read the specified file, then save it in memory as a dict.
             Config file may specify a "shadow", which will then be loaded in and
             overwrite it. This is useful for "transparent" configurations, as it

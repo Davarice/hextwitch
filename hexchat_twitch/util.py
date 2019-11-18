@@ -9,23 +9,31 @@ from .config import cfg
 import ircrust
 
 
-ctxid = lambda ctx: f'{ctx.get_info("network")}/{ctx.get_info("channel")}'
+ctxid = lambda ctx: f"{ctx.get_info('network')}/{ctx.get_info('channel')}"
 # Test whether the passed context is focused.
 is_focused = lambda ctxn: ctxn == ctxid(hexchat.find_context())
 tab_colors: Dict[str, int] = defaultdict(int)
 
 
-def color_tab(ctx, n: int = 0, reset: bool = False) -> None:
+def color_tab(ctx, n: int = 0, force: bool = False) -> None:
     """Color a tab (0-3), but only if the current color is lower."""
     tab_name = ctxid(ctx)
 
     if 0 <= n <= 3 and (
-        reset or (n > tab_colors[tab_name] and not is_focused(tab_name))
+        force or (n > tab_colors[tab_name] and not is_focused(tab_name))
     ):
         # If the new color is "more important", or the function is called with
-        #   the reset flag, change it.
+        #   Force, change it.
         tab_colors[tab_name] = n
         ctx.command(f"gui color {n}")
+
+
+def echo(
+    text: str, type_: str = "Server Error", ctx: hexchat.Context = None, hl: int = 0
+):
+    (ctx or hexchat).emit_print(type_, text)
+    if ctx and hl:
+        color_tab(ctx, hl)
 
 
 def highest_below(seq: Sequence[int], limit: int) -> int:
