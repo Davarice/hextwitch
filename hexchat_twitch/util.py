@@ -56,8 +56,8 @@ def render_badges(bstring: str) -> str:
         #   <= the rank is the key whose value is displayed.
         try:
             rank = int(rank)
-            icon = cfg.get("badges/chars", {}).get(btype)
-            prefix += icon.get(highest_below(icon, rank), "")
+            icon = cfg["badges/chars"][btype]
+            prefix += icon[highest_below(icon, rank)]
         except:
             pass
 
