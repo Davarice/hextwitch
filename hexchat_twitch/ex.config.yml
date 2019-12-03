@@ -47,21 +47,38 @@ badges:
 #
 
 # Announcements for Subscriptions and related events.
-event:
-  lines:
-    bitsbadgetier: "<{subber}> earned a new tier of Bits Badge"
-    giftpaidupgrade: "<{subber}> upgraded their giftsub from {gifter}"
-    primepaidupgrade: "<{subber}> upgraded their Prime Sub"
-    resub: "<{subber}> resubscribed"
-    sub: "<{subber}> subscribed"
-    subgift: "<{subber}> was giftsubbed by {gifter}"
-    submysterygift: "<{gifter}> gives out ({subNumber}) gift subscription{s2}"
-  mods:
-    cumul: ", with ({cumul}) months in total"
-    first: ", starting a new streak"
-    message: ", saying: {msg}"
-    prime: ", with Twitch Prime"
-    streak: " for ({streak}) month{s1} in a row"
+sublines:
+  resub: <${login}> resubscribed
+  sub: <${login}> subscribed
+  subgift: <${msg-param-recipient-user-name}> was giftsubbed by ${login}
+  submysterygift: <${login}> gives out (${msg-param-mass-gift-count}) gift subscription(s)
+  giftpaidupgrade: <${login}> upgraded their giftsub from ${msg-param-sender-login}
+  primepaidupgrade: <${login}> upgraded their Prime Sub
+  bitsbadgetier: <${login}> earned a new tier of Bits Badge
+#
+
+# Modifiers.
+submods:
+  #streak
+  - - [resub, subgift]
+    - []
+    - " for (${msg-param-months}) month(s) in a row"
+  #first
+  - - [sub]
+    - []
+    - ", starting a new streak"
+  #cumul
+  - - []
+    - [msg-param-cumulative-months]
+    - ", with (${msg-param-cumulative-months}) months in total"
+  #prime
+  - - [resub, sub]
+    - []
+    - ", with Twitch Prime"
+  #message
+  - - [resub, sub]
+    - []
+    - ", saying: ${MSG}"
 #
 
 # Names to assign to plugin-managed Channel tabs

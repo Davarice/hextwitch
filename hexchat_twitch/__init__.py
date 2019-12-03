@@ -3,6 +3,8 @@
 Copyright (C) 2019 @Davarice
 Free Software under GPLv3
 """
+from string import Template
+
 
 VERSION = "0.0.9-dev0"
 
@@ -79,7 +81,54 @@ def cb_message_server(words: List[str], _: List[str], __, attrs):
 
     elif message.mtype == "USERNOTICE":
         # Notable event; Subscription or Raid.
-        return  # TODO
+        stype = message.tags.get("msg-id")
+        if not stype:
+            return
+
+        elif stype == "raid":
+            echo(
+                "{msg-param-displayName} sends {msg-param-viewerCount}"
+                " raiders to this channel".format(**message.tags),
+                "Motd",
+                ctx=ctx,
+            )
+            return hexchat.EAT_HEXCHAT
+
+        elif stype == "ritual" or stype == "charity" or stype == "rewardgift":
+            if "system-msg" in message.tags:
+                echo(message.tags["system-msg"].replace("\s", " "), "Motd", ctx=ctx)
+            else:
+                echo(str(message.tags), ctx=ctx)
+
+            return hexchat.EAT_ALL
+
+        else:
+            # Probably a Subscription.
+            alert = cfg["sublines"].get(stype)
+
+            if alert is None:
+                echo(
+                    "Unknown S-Type {!r}: {}".format(
+                        stype,
+                        message.tags.get("system-msg", "").replace("\s", " ")
+                        or message.tags,
+                    ),
+                    ctx=ctx,
+                )
+            else:
+                for types, keys, modifier in cfg["submods"]:
+                    if stype in types and all(key in message.tags for key in keys):
+                        alert += modifier
+
+                echo(
+                    Template(alert).safe_substitute(
+                        MSG=message.message, **message.tags
+                    ),
+                    "Motd",
+                    ctx=ctx,
+                )
+
+            return hexchat.EAT_ALL
 
     elif message.mtype == "WHISPER":
         # Receiving a Twitch Whisper (DM). Put it in its own tab.
@@ -101,8 +150,12 @@ def cb_message_server(words: List[str], _: List[str], __, attrs):
     else:
         # Unknown event type. Make a note of it.
         echo(
-            f"Unknown event {message.mtype!r}: " + message.message
-            or message.tags.get("system-msg", message.tags).replace("\s", " "),
+            f"Unknown M-Type {message.mtype!r}: "
+            + (
+                message.message
+                or message.tags.get("system-msg", "").replace("\s", " ")
+                or message.tags
+            ),
             ctx=ctx,
         )
         color_tab(ctx, 1)
